@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<robot name="tractor">
+
+  <!-- ================= BASE LINK (CHASSIS) ================= -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <!-- A simple 3.5m x 2.4m box to represent the tractor body -->
+        <box size="3.5 2.4 1.5"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.0 0.0 0.8 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="3.5 2.4 1.5"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <!-- Mass is updated dynamically by your config file, but Gazebo needs a baseline -->
+      <mass value="35000.0"/>
+      <inertia ixx="10000" ixy="0" ixz="0" iyy="10000" iyz="0" izz="10000"/>
+    </inertial>
+  </link>
+
+  <!-- ================= IMU SENSOR ================= -->
+  <link name="imu_link"/>
+  
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0.5" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Gazebo IMU Plugin -->
+  <gazebo reference="imu_link">
+    <sensor name="tractor_imu" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <ros>
+          <namespace>/vehicle</namespace>
+          <remapping>~/out:=imu/data</remapping>
+        </ros>
+        <initial_orientation_as_reference>false</initial_orientation_as_reference>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- ================= LIDAR SENSOR ================= -->
+  <link name="lidar_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.1" length="0.1"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <!-- Positioned on the roof at the front -->
+    <origin xyz="1.5 0 0.8" rpy="0 0 0"/> 
+  </joint>
+
+  <!-- Gazebo LiDAR (Ray) Plugin -->
+  <gazebo reference="lidar_link">
+    <sensor name="tractor_lidar" type="ray">
+      <always_on>true</always_on>
+      <visualize>true</visualize> <!-- Draws the laser beams in Gazebo -->
+      <update_rate>20</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1.0</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.3</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </ray>
+      <plugin name="lidar_plugin" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <namespace>/vehicle</namespace>
+          <remapping>~/out:=scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>lidar_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>
