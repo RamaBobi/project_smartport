@@ -1,0 +1,108 @@
+<?xml version="1.0" ?>
+<!--
+  empty.sdf  –  Minimal test world for truck physics tuning.
+
+  No containers, no port structures — just a flat concrete ground plane, sun,
+  and GPS datum so the vehicle_state_node has a valid NavSat reference.
+
+  World name = "empty"  →  joint-state bridge topic:
+    /world/empty/model/heavy_tractor/joint_state
+-->
+<sdf version="1.8">
+  <world name="empty">
+
+    <!-- ── 1. PHYSICS SOLVER ──────────────────────────────────────────────── -->
+    <!-- 1 ms step → same as port world; keeps parity for dynamics comparison -->
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <!-- ODE contact solver tweaks for wheel-ground stability -->
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>50</iters>           <!-- more iterations → more accurate contacts -->
+          <sor>1.3</sor>
+        </solver>
+        <constraints>
+          <cfm>0.0</cfm>             <!-- constraint force mixing (0=hard) -->
+          <erp>0.2</erp>             <!-- error reduction: 20% per step -->
+          <contact_max_correcting_vel>0.1</contact_max_correcting_vel>
+          <contact_surface_layer>0.001</contact_surface_layer>
+        </constraints>
+      </ode>
+    </physics>
+
+    <!-- ── 2. REQUIRED PLUGINS ───────────────────────────────────────────── -->
+    <plugin filename="gz-sim-physics-system"       name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system"       name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-contact-system"       name="gz::sim::systems::Contact"/>
+
+    <!-- ── 3. GPS REFERENCE DATUM (Jakarta port) ─────────────────────────── -->
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>-6.200000</latitude_deg>
+      <longitude_deg>106.816666</longitude_deg>
+      <elevation>0.0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <!-- ── 4. SUN ─────────────────────────────────────────────────────────── -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 100 0 0 0</pose>
+      <diffuse>0.9 0.9 0.85 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>2000</range><constant>0.9</constant>
+        <linear>0.001</linear><quadratic>0.0001</quadratic>
+      </attenuation>
+      <direction>-0.4 0.2 -0.9</direction>
+    </light>
+
+    <!-- ── 5. GROUND PLANE ───────────────────────────────────────────────── -->
+    <!-- 200 × 200 m concrete slab centred at origin. μ=0.9 (dry concrete). -->
+    <model name="ground_plane">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box><size>200.0 200.0 0.1</size></box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0.9</mu>     <!-- longitudinal, dry concrete -->
+                <mu2>0.85</mu2>  <!-- lateral -->
+              </ode>
+            </friction>
+            <contact>
+              <ode>
+                <kp>1e7</kp>           <!-- ground is stiffer than tyre -->
+                <kd>100</kd>
+                <max_vel>0.1</max_vel>
+                <min_depth>0.001</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <pose>0 0 -0.05 0 0 0</pose>
+          <geometry>
+            <box><size>200.0 200.0 0.1</size></box>
+          </geometry>
+          <material>
+            <ambient>0.50 0.50 0.50 1</ambient>
+            <diffuse>0.60 0.60 0.60 1</diffuse>
+            <specular>0.05 0.05 0.05 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

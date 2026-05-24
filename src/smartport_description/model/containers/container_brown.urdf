@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<robot name="container_brown">
+  <link name="base_link">
+    <visual>
+      <geometry><box size="6.0 1.8 2.0"/></geometry>
+      <material name="container_brown"><color rgba="0.45 0.35 0.20 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="6.0 1.8 2.0"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="2300.0"/>
+      <inertia ixx="1388" ixy="0" ixz="0" iyy="7667" iyz="0" izz="7522"/>
+    </inertial>
+  </link>
+
+  <gazebo>
+    <plugin filename="gz-sim-pose-publisher-system" name="gz::sim::systems::PosePublisher">
+      <publish_link_pose>true</publish_link_pose>
+      <publish_nested_model_pose>true</publish_nested_model_pose>
+      <use_pose_vector_msg>true</use_pose_vector_msg>
+    </plugin>
+  </gazebo>
+</robot>

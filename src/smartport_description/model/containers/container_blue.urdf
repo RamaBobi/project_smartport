@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot name="container_blue">
+  <link name="base_link">
+    <visual>
+      <geometry><box size="6.0 1.8 2.0"/></geometry>
+      <material name="container_blue"><color rgba="0.20 0.30 0.50 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="6.0 1.8 2.0"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="2300.0"/>
+      <inertia ixx="1388" ixy="0" ixz="0" iyy="7667" iyz="0" izz="7522"/>
+    </inertial>
+  </link>
+</robot>

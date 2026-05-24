@@ -3,7 +3,7 @@ project(smartport_description)
 
 find_package(ament_cmake REQUIRED)
 
-install(DIRECTORY urdf config
+install(DIRECTORY model worlds
   DESTINATION share/${PROJECT_NAME}
 )
 

@@ -1,0 +1,3760 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+  <world name="port">
+
+    <!-- 1. PHYSICS AND SOLVER -->
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <!-- 2. GAZEBO PLUGINS -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- 3. GPS REFERENCE DATUM (Jakarta) -->
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>-6.200000</latitude_deg>
+      <longitude_deg>106.816666</longitude_deg>
+      <elevation>0.0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <!-- 4. LIGHTING -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>250 250 100 0 0 0</pose>
+      <diffuse>0.9 0.9 0.85 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation><range>2000</range><constant>0.9</constant><linear>0.001</linear><quadratic>0.0001</quadratic></attenuation>
+      <direction>-0.4 0.2 -0.9</direction>
+    </light>
+
+    <!-- 5. WATER (visualization only, no collision) -->
+    <model name="water">
+      <static>true</static>
+      <pose>250 250 -0.3 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>2000 2000</size></plane></geometry>
+          <material>
+            <ambient>0.05 0.15 0.25 1</ambient>
+            <diffuse>0.10 0.25 0.40 1</diffuse>
+            <specular>0.20 0.30 0.45 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 6. PORT SURFACE (500x500 m concrete platform, corner at origin) -->
+    <model name="port_surface">
+      <static>true</static>
+      <pose>250.0 250.0 -0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>500.0 500.0 1.0</size></box></geometry>
+          <surface>
+            <friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>500.0 500.0 1.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.45 0.45 1</ambient>
+            <diffuse>0.55 0.55 0.55 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 7. DYNAMIC CONTAINERS: 4x4 batches of 5x2 containers = 160 total -->
+    <!--    Each container is a separate movable model with mass=2300.0 kg, full inertia, collision. -->
+    <!--    Inner gap within a batch: 0.2 m. Gap between batches: 12.0 m. -->
+    <model name="container_00_00_0_0">
+      <pose>23.000 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_00_0_1">
+      <pose>23.000 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_00_1_0">
+      <pose>29.200 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_00_1_1">
+      <pose>29.200 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_00_2_0">
+      <pose>35.400 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_00_2_1">
+      <pose>35.400 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_00_3_0">
+      <pose>41.600 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_00_3_1">
+      <pose>41.600 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_00_4_0">
+      <pose>47.800 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_00_4_1">
+      <pose>47.800 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_01_0_0">
+      <pose>23.000 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_01_0_1">
+      <pose>23.000 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_01_1_0">
+      <pose>29.200 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_01_1_1">
+      <pose>29.200 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_01_2_0">
+      <pose>35.400 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_01_2_1">
+      <pose>35.400 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_01_3_0">
+      <pose>41.600 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_01_3_1">
+      <pose>41.600 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_01_4_0">
+      <pose>47.800 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_01_4_1">
+      <pose>47.800 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_02_0_0">
+      <pose>23.000 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_02_0_1">
+      <pose>23.000 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_02_1_0">
+      <pose>29.200 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_02_1_1">
+      <pose>29.200 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_02_2_0">
+      <pose>35.400 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_02_2_1">
+      <pose>35.400 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_02_3_0">
+      <pose>41.600 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_02_3_1">
+      <pose>41.600 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_02_4_0">
+      <pose>47.800 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_02_4_1">
+      <pose>47.800 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_03_0_0">
+      <pose>23.000 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_03_0_1">
+      <pose>23.000 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_03_1_0">
+      <pose>29.200 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_03_1_1">
+      <pose>29.200 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_03_2_0">
+      <pose>35.400 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_03_2_1">
+      <pose>35.400 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_03_3_0">
+      <pose>41.600 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_03_3_1">
+      <pose>41.600 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_03_4_0">
+      <pose>47.800 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_00_03_4_1">
+      <pose>47.800 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_00_0_0">
+      <pose>65.800 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_00_0_1">
+      <pose>65.800 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_00_1_0">
+      <pose>72.000 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_00_1_1">
+      <pose>72.000 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_00_2_0">
+      <pose>78.200 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_00_2_1">
+      <pose>78.200 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_00_3_0">
+      <pose>84.400 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_00_3_1">
+      <pose>84.400 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_00_4_0">
+      <pose>90.600 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_00_4_1">
+      <pose>90.600 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_01_0_0">
+      <pose>65.800 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_01_0_1">
+      <pose>65.800 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_01_1_0">
+      <pose>72.000 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_01_1_1">
+      <pose>72.000 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_01_2_0">
+      <pose>78.200 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_01_2_1">
+      <pose>78.200 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_01_3_0">
+      <pose>84.400 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_01_3_1">
+      <pose>84.400 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_01_4_0">
+      <pose>90.600 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_01_4_1">
+      <pose>90.600 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_02_0_0">
+      <pose>65.800 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_02_0_1">
+      <pose>65.800 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_02_1_0">
+      <pose>72.000 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_02_1_1">
+      <pose>72.000 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_02_2_0">
+      <pose>78.200 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_02_2_1">
+      <pose>78.200 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_02_3_0">
+      <pose>84.400 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_02_3_1">
+      <pose>84.400 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_02_4_0">
+      <pose>90.600 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_02_4_1">
+      <pose>90.600 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_03_0_0">
+      <pose>65.800 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_03_0_1">
+      <pose>65.800 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_03_1_0">
+      <pose>72.000 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_03_1_1">
+      <pose>72.000 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_03_2_0">
+      <pose>78.200 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_03_2_1">
+      <pose>78.200 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_03_3_0">
+      <pose>84.400 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_03_3_1">
+      <pose>84.400 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_03_4_0">
+      <pose>90.600 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_01_03_4_1">
+      <pose>90.600 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_00_0_0">
+      <pose>108.600 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_00_0_1">
+      <pose>108.600 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_00_1_0">
+      <pose>114.800 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_00_1_1">
+      <pose>114.800 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_00_2_0">
+      <pose>121.000 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_00_2_1">
+      <pose>121.000 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_00_3_0">
+      <pose>127.200 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_00_3_1">
+      <pose>127.200 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_00_4_0">
+      <pose>133.400 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_00_4_1">
+      <pose>133.400 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_01_0_0">
+      <pose>108.600 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_01_0_1">
+      <pose>108.600 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_01_1_0">
+      <pose>114.800 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_01_1_1">
+      <pose>114.800 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_01_2_0">
+      <pose>121.000 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_01_2_1">
+      <pose>121.000 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_01_3_0">
+      <pose>127.200 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_01_3_1">
+      <pose>127.200 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_01_4_0">
+      <pose>133.400 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_01_4_1">
+      <pose>133.400 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_02_0_0">
+      <pose>108.600 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_02_0_1">
+      <pose>108.600 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_02_1_0">
+      <pose>114.800 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_02_1_1">
+      <pose>114.800 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_02_2_0">
+      <pose>121.000 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_02_2_1">
+      <pose>121.000 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_02_3_0">
+      <pose>127.200 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_02_3_1">
+      <pose>127.200 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_02_4_0">
+      <pose>133.400 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_02_4_1">
+      <pose>133.400 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_03_0_0">
+      <pose>108.600 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_03_0_1">
+      <pose>108.600 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_03_1_0">
+      <pose>114.800 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_03_1_1">
+      <pose>114.800 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_03_2_0">
+      <pose>121.000 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_03_2_1">
+      <pose>121.000 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_03_3_0">
+      <pose>127.200 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_03_3_1">
+      <pose>127.200 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_03_4_0">
+      <pose>133.400 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_02_03_4_1">
+      <pose>133.400 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_00_0_0">
+      <pose>151.400 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_00_0_1">
+      <pose>151.400 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_00_1_0">
+      <pose>157.600 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_00_1_1">
+      <pose>157.600 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_00_2_0">
+      <pose>163.800 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_00_2_1">
+      <pose>163.800 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_00_3_0">
+      <pose>170.000 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_00_3_1">
+      <pose>170.000 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_00_4_0">
+      <pose>176.200 30.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_00_4_1">
+      <pose>176.200 32.900 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_01_0_0">
+      <pose>151.400 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_01_0_1">
+      <pose>151.400 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_01_1_0">
+      <pose>157.600 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_01_1_1">
+      <pose>157.600 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_01_2_0">
+      <pose>163.800 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_01_2_1">
+      <pose>163.800 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_01_3_0">
+      <pose>170.000 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_01_3_1">
+      <pose>170.000 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_01_4_0">
+      <pose>176.200 46.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_01_4_1">
+      <pose>176.200 48.700 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_02_0_0">
+      <pose>151.400 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_02_0_1">
+      <pose>151.400 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_02_1_0">
+      <pose>157.600 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_02_1_1">
+      <pose>157.600 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_02_2_0">
+      <pose>163.800 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_02_2_1">
+      <pose>163.800 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_02_3_0">
+      <pose>170.000 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_02_3_1">
+      <pose>170.000 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_02_4_0">
+      <pose>176.200 62.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_02_4_1">
+      <pose>176.200 64.500 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_03_0_0">
+      <pose>151.400 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.3 0.5 1</ambient>
+            <diffuse>0.2 0.3 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_03_0_1">
+      <pose>151.400 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_03_1_0">
+      <pose>157.600 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_03_1_1">
+      <pose>157.600 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_03_2_0">
+      <pose>163.800 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.35 0.35 0.4 1</ambient>
+            <diffuse>0.35 0.35 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_03_2_1">
+      <pose>163.800 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_03_3_0">
+      <pose>170.000 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.45 0.35 0.2 1</ambient>
+            <diffuse>0.45 0.35 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_03_3_1">
+      <pose>170.000 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_03_4_0">
+      <pose>176.200 78.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.55 0.15 0.15 1</ambient>
+            <diffuse>0.55 0.15 0.15 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="container_03_03_4_1">
+      <pose>176.200 80.300 1.050 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>2300.0</mass>
+          <inertia>
+            <ixx>1387.67</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>7666.67</iyy><iyz>0</iyz>
+            <izz>7521.0</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 1.8 2.0</size></box></geometry>
+          <material>
+            <ambient>0.2 0.4 0.25 1</ambient>
+            <diffuse>0.2 0.4 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

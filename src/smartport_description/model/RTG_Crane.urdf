@@ -1,0 +1,530 @@
+<?xml version="1.0" ?>
+<robot name="rtg_crane">
+
+  <link name="base_footprint" />
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Main Structure of the RTG Crane -->
+  <link name="base_link">
+    <inertial>
+      <mass value="100.0"/>
+      <origin xyz="0 0 7.5" rpy="0 0 0"/>
+      <inertia ixx="100.0" ixy="0.0" ixz="0.0" iyy="100.0" iyz="0.0" izz="100.0"/>
+    </inertial>
+
+    <!-- LEFT SILL BEAM -->
+    <visual>
+      <origin xyz="0 5.2 1.0" rpy="0 0 0"/>
+      <geometry><box size="9.0 0.5 1.0"/></geometry>
+      <material name="yellow"><color rgba="1.0 0.8 0.0 1.0"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 5.2 1.0" rpy="0 0 0"/>
+      <geometry><box size="9.0 0.5 1.0"/></geometry>
+    </collision>
+
+    <!-- RIGHT SILL BEAM -->
+    <visual>
+      <origin xyz="0 -5.2 1.0" rpy="0 0 0"/>
+      <geometry><box size="9.0 0.5 1.0"/></geometry>
+      <material name="yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="0 -5.2 1.0" rpy="0 0 0"/>
+      <geometry><box size="9.0 0.5 1.0"/></geometry>
+    </collision>
+
+    <!-- FRONT LEFT LEG -->
+    <visual>
+      <origin xyz="4.25 5.2 8.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 0.5 13.5"/></geometry>
+      <material name="yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="4.25 5.2 8.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 0.5 13.5"/></geometry>
+    </collision>
+
+    <!-- REAR LEFT LEG -->
+    <visual>
+      <origin xyz="-4.25 5.2 8.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 0.5 13.5"/></geometry>
+      <material name="yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="-4.25 5.2 8.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 0.5 13.5"/></geometry>
+    </collision>
+
+    <!-- FRONT RIGHT LEG -->
+    <visual>
+      <origin xyz="4.25 -5.2 8.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 0.5 13.5"/></geometry>
+      <material name="yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="4.25 -5.2 8.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 0.5 13.5"/></geometry>
+    </collision>
+
+    <!-- REAR RIGHT LEG -->
+    <visual>
+      <origin xyz="-4.25 -5.2 8.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 0.5 13.5"/></geometry>
+      <material name="yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="-4.25 -5.2 8.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 0.5 13.5"/></geometry>
+    </collision>
+
+    <!-- FRONT TOP BEAM (Inverted U top) -->
+    <visual>
+      <origin xyz="4.25 0 15.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 10.9 0.5"/></geometry>
+      <material name="yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="4.25 0 15.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 10.9 0.5"/></geometry>
+    </collision>
+
+    <!-- REAR TOP BEAM (Inverted U top) -->
+    <visual>
+      <origin xyz="-4.25 0 15.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 10.9 0.5"/></geometry>
+      <material name="yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="-4.25 0 15.25" rpy="0 0 0"/>
+      <geometry><box size="0.5 10.9 0.5"/></geometry>
+    </collision>
+    
+    <!-- LEFT TOP LONGITUDINAL BEAM -->
+    <visual>
+      <origin xyz="0 5.2 15.25" rpy="0 0 0"/>
+      <geometry><box size="9.0 0.5 0.5"/></geometry>
+      <material name="yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="0 5.2 15.25" rpy="0 0 0"/>
+      <geometry><box size="9.0 0.5 0.5"/></geometry>
+    </collision>
+
+    <!-- RIGHT TOP LONGITUDINAL BEAM -->
+    <visual>
+      <origin xyz="0 -5.2 15.25" rpy="0 0 0"/>
+      <geometry><box size="9.0 0.5 0.5"/></geometry>
+      <material name="yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="0 -5.2 15.25" rpy="0 0 0"/>
+      <geometry><box size="9.0 0.5 0.5"/></geometry>
+    </collision>
+  </link>
+
+  <!-- WHEELS (FRONT LEFT) -->
+  <link name="fl_wheel_1">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+      <material name="black"><color rgba="0.1 0.1 0.1 1.0"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+    </collision>
+  </link>
+  <joint name="fl_wheel_1_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="fl_wheel_1"/>
+    <origin xyz="4.0 5.6 0.5" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="fl_wheel_2">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+    </collision>
+  </link>
+  <joint name="fl_wheel_2_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="fl_wheel_2"/>
+    <origin xyz="4.0 4.8 0.5" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- WHEELS (REAR LEFT) -->
+  <link name="rl_wheel_1">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+    </collision>
+  </link>
+  <joint name="rl_wheel_1_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rl_wheel_1"/>
+    <origin xyz="-4.0 5.6 0.5" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="rl_wheel_2">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+    </collision>
+  </link>
+  <joint name="rl_wheel_2_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rl_wheel_2"/>
+    <origin xyz="-4.0 4.8 0.5" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- WHEELS (FRONT RIGHT) -->
+  <link name="fr_wheel_1">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+    </collision>
+  </link>
+  <joint name="fr_wheel_1_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="fr_wheel_1"/>
+    <origin xyz="4.0 -5.6 0.5" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="fr_wheel_2">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+    </collision>
+  </link>
+  <joint name="fr_wheel_2_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="fr_wheel_2"/>
+    <origin xyz="4.0 -4.8 0.5" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- WHEELS (REAR RIGHT) -->
+  <link name="rr_wheel_1">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+    </collision>
+  </link>
+  <joint name="rr_wheel_1_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rr_wheel_1"/>
+    <origin xyz="-4.0 -5.6 0.5" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="rr_wheel_2">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder radius="0.5" length="0.3"/></geometry>
+    </collision>
+  </link>
+  <joint name="rr_wheel_2_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rr_wheel_2"/>
+    <origin xyz="-4.0 -4.8 0.5" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- 3D PRINTER STYLE TROLLEY & HOIST -->
+
+  <!-- X Carriage (moves forward/backward along top beams) -->
+  <link name="x_carriage">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="10.0" ixy="0" ixz="0" iyy="10.0" iyz="0" izz="10.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="1.0 10.4 0.2"/></geometry>
+      <material name="blue"><color rgba="0 0 1 1"/></material>
+    </visual>
+  </link>
+  <joint name="x_carriage_joint" type="prismatic">
+    <parent link="base_link"/>
+    <child link="x_carriage"/>
+    <!-- Set origin correctly at the top of the crane -->
+    <origin xyz="0 0 15.6" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-4.0" upper="4.0" effort="500" velocity="1.0"/>
+  </joint>
+
+  <!-- Y Trolley (moves left/right along the X carriage) -->
+  <link name="trolley">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="10.0" ixy="0" ixz="0" iyy="10.0" iyz="0" izz="10.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="1.2 1.2 0.4"/></geometry>
+      <material name="red"><color rgba="1 0 0 1"/></material>
+    </visual>
+  </link>
+  <joint name="trolley_joint" type="prismatic">
+    <parent link="x_carriage"/>
+    <child link="trolley"/>
+    <!-- Trolley sits slightly above carriage -->
+    <origin xyz="0 0 0.2" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-4.5" upper="4.5" effort="500" velocity="1.0"/>
+  </joint>
+
+  <!-- TELESCOPING HOIST MECHANISM -->
+  <!-- Outer Fixed Tubes (Always hang down from trolley) -->
+  <link name="hoist_fixed">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="10.0" ixy="0" ixz="0" iyy="10.0" iyz="0" izz="10.0"/>
+    </inertial>
+    <!-- Rod 1 Front -->
+    <visual>
+      <origin xyz="2.0 0 -2.4" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.15" length="4.8"/></geometry>
+      <material name="dark_grey"><color rgba="0.3 0.3 0.3 1"/></material>
+    </visual>
+    <!-- Rod 2 Rear -->
+    <visual>
+      <origin xyz="-2.0 0 -2.4" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.15" length="4.8"/></geometry>
+      <material name="dark_grey"/>
+    </visual>
+  </link>
+  <joint name="hoist_fixed_joint" type="fixed">
+    <parent link="trolley"/>
+    <child link="hoist_fixed"/>
+    <!-- Attached to the center of the trolley -->
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Middle Tubes (Slide out of Fixed Tubes) -->
+  <link name="hoist_mid">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="10.0" ixy="0" ixz="0" iyy="10.0" iyz="0" izz="10.0"/>
+    </inertial>
+    <!-- Rod 1 Front -->
+    <visual>
+      <origin xyz="2.0 0 -2.4" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.10" length="4.8"/></geometry>
+      <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
+    </visual>
+    <!-- Rod 2 Rear -->
+    <visual>
+      <origin xyz="-2.0 0 -2.4" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.10" length="4.8"/></geometry>
+      <material name="grey"/>
+    </visual>
+  </link>
+  <joint name="hoist_mid_joint" type="prismatic">
+    <parent link="hoist_fixed"/>
+    <child link="hoist_mid"/>
+    <!-- Origin identical to fixed tube, so at 0 it is fully retracted inside -->
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <!-- Moves down by 4.8m max -->
+    <limit lower="-4.8" upper="0.0" effort="5000" velocity="0.5"/>
+  </joint>
+
+  <!-- Inner Tubes & Spreader (Slide out of Middle Tubes) -->
+  <link name="spreader">
+    <inertial>
+      <mass value="10.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="10.0" ixy="0" ixz="0" iyy="10.0" iyz="0" izz="10.0"/>
+    </inertial>
+    <!-- Inner Rods attaching to the spreader -->
+    <visual>
+      <origin xyz="2.0 0 -2.4" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.05" length="4.8"/></geometry>
+      <material name="light_grey"><color rgba="0.7 0.7 0.7 1"/></material>
+    </visual>
+    <visual>
+      <origin xyz="-2.0 0 -2.4" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.05" length="4.8"/></geometry>
+      <material name="light_grey"/>
+    </visual>
+    <!-- The Rectangular Box Attachment (Container Spreader) -->
+    <!-- Attached to the very bottom of these 4.8m rods -->
+    <visual>
+      <origin xyz="0 0 -4.8" rpy="0 0 0"/>
+      <geometry><box size="6.0 2.4 0.5"/></geometry>
+      <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
+    </visual>
+    <collision>
+      <!-- We keep collision ONLY for the spreader base so it can grab containers -->
+      <origin xyz="0 0 -4.8" rpy="0 0 0"/>
+      <geometry><box size="6.0 2.4 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="spreader_joint" type="prismatic">
+    <parent link="hoist_mid"/>
+    <child link="spreader"/>
+    <!-- Origin identical to mid tube, so at 0 it is fully retracted inside -->
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <!-- Moves down by another 4.8m max -->
+    <limit lower="-4.8" upper="0.0" effort="5000" velocity="0.5"/>
+  </joint>
+
+  <!-- Gazebo Position Controllers -->
+  <gazebo>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>x_carriage_joint</joint_name>
+      <topic>/rtg/x_carriage/cmd_pos</topic>
+      <p_gain>50000</p_gain>
+      <i_gain>100</i_gain>
+      <d_gain>5000</d_gain>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>trolley_joint</joint_name>
+      <topic>/rtg/trolley/cmd_pos</topic>
+      <p_gain>50000</p_gain>
+      <i_gain>100</i_gain>
+      <d_gain>5000</d_gain>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>hoist_mid_joint</joint_name>
+      <topic>/rtg/hoist_mid/cmd_pos</topic>
+      <p_gain>100000</p_gain>
+      <i_gain>100</i_gain>
+      <d_gain>10000</d_gain>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>spreader_joint</joint_name>
+      <topic>/rtg/spreader/cmd_pos</topic>
+      <p_gain>100000</p_gain>
+      <i_gain>100</i_gain>
+      <d_gain>10000</d_gain>
+    </plugin>
+
+    <!-- Diff Drive Plugin for driving the Crane along its X-axis -->
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>fl_wheel_1_joint</left_joint>
+      <left_joint>fl_wheel_2_joint</left_joint>
+      <left_joint>rl_wheel_1_joint</left_joint>
+      <left_joint>rl_wheel_2_joint</left_joint>
+      
+      <right_joint>fr_wheel_1_joint</right_joint>
+      <right_joint>fr_wheel_2_joint</right_joint>
+      <right_joint>rr_wheel_1_joint</right_joint>
+      <right_joint>rr_wheel_2_joint</right_joint>
+      
+      <wheel_separation>10.4</wheel_separation>
+      <wheel_radius>0.5</wheel_radius>
+      <odom_publish_frequency>20</odom_publish_frequency>
+      <topic>cmd_vel</topic>
+      <odom_topic>odom</odom_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_footprint</child_frame_id>
+    </plugin>
+
+    <!-- Auto-Grabber: Detachable Joint Plugin -->
+    <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+      <parent_link>spreader</parent_link>
+      <child_model>container_brown</child_model>
+      <child_link>base_link</child_link>
+      <topic>/rtg/attach</topic>
+      <suppress_child_warning>true</suppress_child_warning>
+    </plugin>
+
+    <!-- Auto-Grabber: Publish Joint States for TF -->
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+    </plugin>
+  </gazebo>
+
+</robot>

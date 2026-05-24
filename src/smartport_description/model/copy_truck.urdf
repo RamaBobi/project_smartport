@@ -1,0 +1,1354 @@
+<?xml version="1.0"?>
+<!--
+  copy_truck.urdf  –  Physics-optimised port tractor (TRACTOR ONLY, no trailer).
+  ─────────────────────────────────────────────────────────────────────────────
+  Geometry is identical to tractor.urdf.
+  Every change from the original is marked  [PHYSICS] with the reason.
+
+  Summary of changes:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ 1. Chassis hub inertia corrected  (was 333/541/541 → 555/390/915 kg·m²) │
+  │ 2. Driver deck inertia corrected  (was 135/187/135 → 229/187/229 kg·m²) │
+  │    Bug: original missed Z² in Ixx and Izz formulas.                     │
+  │ 3. Suspension spring stiffness    100 000 → 70 000 N/m                  │
+  │    Reason: 100 kN/m gives fn≈2.2 Hz; target is 1.5 Hz for a truck.      │
+  │    k = (2π·1.5)²·m_per_wheel = 88.8·777 ≈ 70 000 N/m                   │
+  │    Damping kept at 4500 → ζ≈0.31 (lightly underdamped) ✓                │
+  │ 4. Per-wheel contact surface      rubber-on-concrete (mu=0.85/0.75)     │
+  │    kp=1e6 N/m, kd=50, slip1=0.002, slip2=0.005, minDepth=0.002 m        │
+  │ 5. Steering joint friction        5.0 → 1.5 Nm (less stiction)          │
+  │ 6. Steering servo PID             p 500→1500, i 1→2, d 50→100           │
+  │ 7. Trailer reattached             4 wheels w/ k=70000 + PID + bars       │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+  Inertia reference:  solid box I = m(a²+b²)/12  for off-axis pair a,b.
+  Inertia reference:  solid cylinder Ixx=Iyy = m(3r²+l²)/12, Izz = mr²/2.
+-->
+<robot name="copy_truck" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- ============================================================== -->
+  <!-- 1.  ROOT & CHASSIS HUB                                          -->
+  <!-- ============================================================== -->
+  <link name="base_link"/>
+  <joint name="base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin xyz="0 0 1.0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="chassis">
+    <inertial>
+      <mass value="2000.0"/>
+      <!--
+        [PHYSICS] Corrected. chassis is the structural hub tying the frame.
+        Modelled as a hollow box  1.5 m (X) × 1.8 m (Y) × 0.3 m (Z):
+          Ixx = 2000*(1.8²+0.3²)/12 = 2000*3.33/12  =  555  kg·m²
+          Iyy = 2000*(1.5²+0.3²)/12 = 2000*2.34/12  =  390  kg·m²
+          Izz = 2000*(1.5²+1.8²)/12 = 2000*5.49/12  =  915  kg·m²
+        (was 333 / 541 / 541 – too low, caused wobble at low speed)
+      -->
+      <inertia ixx="555" ixy="0" ixz="0"
+               iyy="390" iyz="0"
+               izz="915"/>
+    </inertial>
+  </link>
+
+  <!-- ============================================================== -->
+  <!-- 2.  TRUCK H FRAME  (rails unchanged – inertias already correct) -->
+  <!-- ============================================================== -->
+
+  <joint name="chassis_to_left_rail" type="fixed">
+    <parent link="chassis"/>
+    <child link="left_rail"/>
+    <origin xyz="0 0.9 0" rpy="0 0 0"/>
+  </joint>
+  <link name="left_rail">
+    <visual>
+      <geometry><box size="4.0 0.2 0.3"/></geometry>
+      <material name="dark_grey"><color rgba="0.2 0.2 0.2 1.0"/></material>
+    </visual>
+    <collision><geometry><box size="4.0 0.2 0.3"/></geometry></collision>
+    <inertial>
+      <mass value="600.0"/>
+      <!-- box 4.0×0.2×0.3: Ixx=6.5 Iyy=804.5 Izz=802 — already correct -->
+      <inertia ixx="6.5" ixy="0" ixz="0" iyy="804.5" iyz="0" izz="802"/>
+    </inertial>
+  </link>
+
+  <joint name="chassis_to_right_rail" type="fixed">
+    <parent link="chassis"/>
+    <child link="right_rail"/>
+    <origin xyz="0 -0.9 0" rpy="0 0 0"/>
+  </joint>
+  <link name="right_rail">
+    <visual>
+      <geometry><box size="4.0 0.2 0.3"/></geometry>
+      <material name="dark_grey"><color rgba="0.2 0.2 0.2 1.0"/></material>
+    </visual>
+    <collision><geometry><box size="4.0 0.2 0.3"/></geometry></collision>
+    <inertial>
+      <mass value="600.0"/>
+      <inertia ixx="6.5" ixy="0" ixz="0" iyy="804.5" iyz="0" izz="802"/>
+    </inertial>
+  </link>
+
+  <!-- ── AXLE BEAMS — Z=−0.4 (was −0.5) ────────────────────────────────
+       Compensates for the chassis-sag under gravity:
+         per-wheel sprung mass m ≈ 692 kg
+         k = 70 000 N/m  →  Δ = m·g/k ≈ 0.097 m
+       After the truck settles, the wheel centres rise ~0.1 m relative to
+       chassis (spring compresses), so the axle moves up 0.1 m to keep
+       coincident with the actual wheel-centre line.
+  ─────────────────────────────────────────────────────────────────────── -->
+  <!-- Front axle beam: spans ±1.2 m to reach tyre centres -->
+  <joint name="chassis_to_front_axle_beam" type="fixed">
+    <parent link="chassis"/>
+    <child link="front_axle_beam"/>
+    <origin xyz="1.5 0 -0.4" rpy="1.5708 0 0"/>
+  </joint>
+  <link name="front_axle_beam">
+    <visual><geometry><cylinder radius="0.08" length="2.4"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.08" length="2.4"/></geometry></collision>
+    <inertial>
+      <mass value="120.0"/>
+      <!-- cylinder r=0.08 l=2.4: same inertia as before -->
+      <inertia ixx="57.79" ixy="0" ixz="0" iyy="0.384" iyz="0" izz="57.79"/>
+    </inertial>
+  </link>
+
+  <!-- Mid axle beam: X=−0.5, Z=−0.4 (raised 0.1 m for chassis-sag) -->
+  <joint name="chassis_to_mid_axle_beam" type="fixed">
+    <parent link="chassis"/>
+    <child link="mid_axle_beam"/>
+    <origin xyz="-0.5 0 -0.4" rpy="1.5708 0 0"/>
+  </joint>
+  <link name="mid_axle_beam">
+    <visual><geometry><cylinder radius="0.08" length="2.4"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.08" length="2.4"/></geometry></collision>
+    <inertial>
+      <mass value="120.0"/>
+      <!-- extended to 2.4 m → same inertia as front beam -->
+      <inertia ixx="57.79" ixy="0" ixz="0" iyy="0.384" iyz="0" izz="57.79"/>
+    </inertial>
+  </link>
+
+  <!-- Rear axle beam: Z=−0.4 (raised 0.1 m for chassis-sag) -->
+  <joint name="chassis_to_rear_axle_beam" type="fixed">
+    <parent link="chassis"/>
+    <child link="rear_axle_beam"/>
+    <origin xyz="-1.5 0 -0.4" rpy="1.5708 0 0"/>
+  </joint>
+  <link name="rear_axle_beam">
+    <visual><geometry><cylinder radius="0.08" length="2.4"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.08" length="2.4"/></geometry></collision>
+    <inertial>
+      <mass value="120.0"/>
+      <inertia ixx="57.79" ixy="0" ixz="0" iyy="0.384" iyz="0" izz="57.79"/>
+    </inertial>
+  </link>
+
+  <!-- ── VERTICAL SUSPENSION STRUTS ─────────────────────────────────────
+       Each strut is a fixed visual bar from the chassis frame (Z=0 relative)
+       straight down to the axle level (Z=−0.5 relative).
+       Parent = chassis so all 6 bars share the same reference frame.
+       Strut centre is at Z=−0.25 (half of 0.5 m span).
+       The front struts coincide with the fl/fr steer-rotation (Z) axis
+       at their bottom end (Z=−0.5), which is now the steer-mount position.
+  ─────────────────────────────────────────────────────────────────────── -->
+  <!-- Inertia for strut box 0.07 × 0.07 × 0.5, m=10 kg:
+       Ixx=Iyy = 10*(0.07²+0.5²)/12 = 0.212    Izz = 10*(0.07²+0.07²)/12 = 0.008 -->
+
+  <!-- Front-LEFT suspension bar.
+       Y shifted inboard by 0.185 m (= wheel_width/2 + bar_width/2 = 0.15 + 0.035)
+       so the bar sits flush against the inner face of the wheel — visible
+       instead of buried inside the wheel disc. -->
+  <joint name="chassis_to_fl_suspension_bar" type="fixed">
+    <parent link="chassis"/>
+    <child link="fl_suspension_bar"/>
+    <origin xyz="1.5 1.015 -0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="fl_suspension_bar">
+    <visual>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+      <material name="suspension_orange"><color rgba="1.0 0.55 0.0 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+    </collision>
+    <inertial><mass value="10.0"/>
+      <inertia ixx="0.212" ixy="0" ixz="0" iyy="0.212" iyz="0" izz="0.008"/>
+    </inertial>
+  </link>
+
+  <!-- Front-RIGHT suspension bar (Y shifted inboard by 0.185 m). -->
+  <joint name="chassis_to_fr_suspension_bar" type="fixed">
+    <parent link="chassis"/>
+    <child link="fr_suspension_bar"/>
+    <origin xyz="1.5 -1.015 -0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="fr_suspension_bar">
+    <visual>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+      <material name="suspension_orange"><color rgba="1.0 0.55 0.0 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+    </collision>
+    <inertial><mass value="10.0"/>
+      <inertia ixx="0.212" ixy="0" ixz="0" iyy="0.212" iyz="0" izz="0.008"/>
+    </inertial>
+  </link>
+
+  <!-- Mid/rear struts parented to the RAILS so positions stay in rail-local
+       frame (rails are fixed to chassis, so dynamics are identical, but
+       the origin numbers directly match the spring origin offsets).
+       Each strut hangs from the rail face down to the hub/axle level.
+       left_rail at Y=+0.9 from chassis → hub at Y=+0.3 in rail frame = Y=+1.2 chassis.
+       right_rail at Y=−0.9 from chassis → hub at Y=−0.3 in rail frame = Y=−1.2 chassis. -->
+
+  <!-- Mid-LEFT suspension bar (child of left_rail).
+       rail-frame Y: 0.3 → 0.115 (= 0.3 − 0.185)  →  chassis Y: 0.9+0.115 = 1.015 -->
+  <joint name="left_rail_to_ml_suspension_bar" type="fixed">
+    <parent link="left_rail"/>
+    <child link="ml_suspension_bar"/>
+    <origin xyz="-0.5 0.115 -0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="ml_suspension_bar">
+    <visual>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+      <material name="suspension_orange"><color rgba="1.0 0.55 0.0 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+    </collision>
+    <inertial><mass value="10.0"/>
+      <inertia ixx="0.212" ixy="0" ixz="0" iyy="0.212" iyz="0" izz="0.008"/>
+    </inertial>
+  </link>
+
+  <!-- Mid-RIGHT suspension bar.  rail-frame Y: −0.3 → −0.115 -->
+  <joint name="right_rail_to_mr_suspension_bar" type="fixed">
+    <parent link="right_rail"/>
+    <child link="mr_suspension_bar"/>
+    <origin xyz="-0.5 -0.115 -0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="mr_suspension_bar">
+    <visual>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+      <material name="suspension_orange"><color rgba="1.0 0.55 0.0 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+    </collision>
+    <inertial><mass value="10.0"/>
+      <inertia ixx="0.212" ixy="0" ixz="0" iyy="0.212" iyz="0" izz="0.008"/>
+    </inertial>
+  </link>
+
+  <!-- Rear-LEFT suspension bar.  rail-frame Y: 0.3 → 0.115 -->
+  <joint name="left_rail_to_rl_suspension_bar" type="fixed">
+    <parent link="left_rail"/>
+    <child link="rl_suspension_bar"/>
+    <origin xyz="-1.5 0.115 -0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="rl_suspension_bar">
+    <visual>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+      <material name="suspension_orange"><color rgba="1.0 0.55 0.0 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+    </collision>
+    <inertial><mass value="10.0"/>
+      <inertia ixx="0.212" ixy="0" ixz="0" iyy="0.212" iyz="0" izz="0.008"/>
+    </inertial>
+  </link>
+
+  <!-- Rear-RIGHT suspension bar.  rail-frame Y: −0.3 → −0.115 -->
+  <joint name="right_rail_to_rr_suspension_bar" type="fixed">
+    <parent link="right_rail"/>
+    <child link="rr_suspension_bar"/>
+    <origin xyz="-1.5 -0.115 -0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="rr_suspension_bar">
+    <visual>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+      <material name="suspension_orange"><color rgba="1.0 0.55 0.0 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+    </collision>
+    <inertial><mass value="10.0"/>
+      <inertia ixx="0.212" ixy="0" ixz="0" iyy="0.212" iyz="0" izz="0.008"/>
+    </inertial>
+  </link>
+
+  <!-- ============================================================== -->
+  <!-- 3.  DRIVER DECK                                                  -->
+  <!-- ============================================================== -->
+  <joint name="chassis_to_deck" type="fixed">
+    <parent link="chassis"/>
+    <child link="driver_deck"/>
+    <origin xyz="1.0 0 0.75" rpy="0 0 0"/>
+  </joint>
+  <link name="driver_deck">
+    <visual><geometry><box size="1.5 1.8 1.5"/></geometry></visual>
+    <collision><geometry><box size="1.5 1.8 1.5"/></geometry></collision>
+    <inertial>
+      <mass value="500.0"/>
+      <!--
+        [PHYSICS] CORRECTED INERTIA.  box 1.5 m (X) × 1.8 m (Y) × 1.5 m (Z):
+          Ixx = 500*(Y²+Z²)/12 = 500*(3.24+2.25)/12 = 500*5.49/12 = 228.75 kg·m²
+          Iyy = 500*(X²+Z²)/12 = 500*(2.25+2.25)/12 = 500*4.50/12 = 187.50 kg·m²
+          Izz = 500*(X²+Y²)/12 = 500*(2.25+3.24)/12 = 500*5.49/12 = 228.75 kg·m²
+        ORIGINAL had Ixx=135=Izz which is  500*Y²/12 only — missed the second term.
+        This caused unrealistic pitch/roll inertia (~40% too low).
+      -->
+      <inertia ixx="228.75" ixy="0" ixz="0"
+               iyy="187.50" iyz="0"
+               izz="228.75"/>
+    </inertial>
+  </link>
+
+  <!-- ============================================================== -->
+  <!-- 4.  FRONT SUSPENSION + STEERING WHEELS                          -->
+  <!--     [PHYSICS] suspension spring: 100000 → 70000 N/m            -->
+  <!--     [PHYSICS] steering joint friction: 5.0 → 1.5 Nm            -->
+  <!-- ============================================================== -->
+
+  <!-- ── FRONT LEFT ── -->
+  <!-- steering_joint placed directly on fl_suspension_bar.
+       Bar origin is at chassis(1.5,1.2,−0.25); offset −0.25 in Z puts the
+       steering axis at chassis(1.5,1.2,−0.5) = axle / wheel-centre level. -->
+  <joint name="fl_steering_joint" type="revolute">
+    <parent link="fl_suspension_bar"/>
+    <child link="fl_steer_knuckle"/>
+    <origin xyz="0 0 -0.25" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.6109" upper="0.6109" effort="2000" velocity="1.5"/>
+    <!-- [PHYSICS] friction 5.0→1.5: reduces steering stiction for faster servo response -->
+    <dynamics damping="30.0" friction="1.5"/>
+  </joint>
+  <link name="fl_steer_knuckle">
+    <inertial><mass value="15.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+
+  <joint name="fl_spring" type="prismatic">
+    <parent link="fl_steer_knuckle"/>
+    <child link="fl_hub"/>
+    <!-- [GEOM] Y offset = +0.185 m compensates for the suspension bar
+         being shifted inboard, so the wheel stays at chassis Y=+1.2.
+         This is a real scrub-radius / kingpin-offset (the wheel pivots
+         around an axis 0.185 m inboard of its centre line). -->
+    <origin xyz="0 0.185 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.15" upper="0.15" effort="50000" velocity="2.0"/>
+    <!-- [PHYSICS] spring_stiffness 100000→70000: fn=1.5 Hz at 777 kg/wheel -->
+    <dynamics damping="4500.0" friction="100.0" spring_stiffness="70000.0" spring_reference="0"/>
+  </joint>
+  <link name="fl_hub">
+    <!-- hub has no visual — the axle beam already shows where the hubs are -->
+    <inertial><mass value="20.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+  <joint name="fl_hub_to_fl_wheel" type="continuous">
+    <parent link="fl_hub"/>
+    <child link="fl_wheel"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="fl_wheel">
+    <visual><geometry><cylinder radius="0.5" length="0.3"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.5" length="0.3"/></geometry></collision>
+    <!-- cylinder r=0.5 l=0.3 m=80: Ixx=Iyy=m(3r²+l²)/12=5.6  Izz=mr²/2=10 ✓ -->
+    <inertial><mass value="80.0"/><inertia ixx="5.6" ixy="0" ixz="0" iyy="5.6" iyz="0" izz="10.0"/></inertial>
+  </link>
+
+  <!-- ── FRONT RIGHT ── -->
+  <!-- steering_joint placed directly on fr_suspension_bar -->
+  <joint name="fr_steering_joint" type="revolute">
+    <parent link="fr_suspension_bar"/>
+    <child link="fr_steer_knuckle"/>
+    <origin xyz="0 0 -0.25" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.6109" upper="0.6109" effort="2000" velocity="1.5"/>
+    <dynamics damping="30.0" friction="1.5"/>
+  </joint>
+  <link name="fr_steer_knuckle">
+    <inertial><mass value="15.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+
+  <joint name="fr_spring" type="prismatic">
+    <parent link="fr_steer_knuckle"/>
+    <child link="fr_hub"/>
+    <!-- [GEOM] Y offset = −0.185 m  (mirror of fl_spring) -->
+    <origin xyz="0 -0.185 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.15" upper="0.15" effort="50000" velocity="2.0"/>
+    <!-- [PHYSICS] spring_stiffness 100000→70000 -->
+    <dynamics damping="4500.0" friction="100.0" spring_stiffness="70000.0" spring_reference="0"/>
+  </joint>
+  <link name="fr_hub">
+    <inertial><mass value="20.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+  <joint name="fr_hub_to_fr_wheel" type="continuous">
+    <parent link="fr_hub"/>
+    <child link="fr_wheel"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="fr_wheel">
+    <visual><geometry><cylinder radius="0.5" length="0.3"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.5" length="0.3"/></geometry></collision>
+    <inertial><mass value="80.0"/><inertia ixx="5.6" ixy="0" ixz="0" iyy="5.6" iyz="0" izz="10.0"/></inertial>
+  </link>
+
+  <!-- ============================================================== -->
+  <!-- 5.  MID / REAR DRIVE AXLES                                      -->
+  <!--     [PHYSICS] spring_stiffness 100000 → 70000 N/m (all 4)      -->
+  <!-- ============================================================== -->
+
+  <!-- ── MID LEFT (X=−0.5, moved rearward slightly from −0.3) ── -->
+  <joint name="left_rail_to_ml_spring" type="prismatic">
+    <parent link="left_rail"/>
+    <child link="ml_hub"/>
+    <origin xyz="-0.5 0.3 -0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.15" upper="0.15" effort="50000" velocity="2.0"/>
+    <!-- [PHYSICS] 100000→70000 -->
+    <dynamics damping="4500.0" friction="100.0" spring_stiffness="70000.0" spring_reference="0"/>
+  </joint>
+  <link name="ml_hub">
+    <inertial><mass value="20.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+  <joint name="ml_hub_to_ml_wheel" type="continuous">
+    <parent link="ml_hub"/>
+    <child link="ml_wheel"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="ml_wheel">
+    <visual><geometry><cylinder radius="0.5" length="0.3"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.5" length="0.3"/></geometry></collision>
+    <inertial><mass value="80.0"/><inertia ixx="5.6" ixy="0" ixz="0" iyy="5.6" iyz="0" izz="10.0"/></inertial>
+  </link>
+
+  <!-- ── MID RIGHT (X=−0.5) ── -->
+  <joint name="right_rail_to_mr_spring" type="prismatic">
+    <parent link="right_rail"/>
+    <child link="mr_hub"/>
+    <origin xyz="-0.5 -0.3 -0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.15" upper="0.15" effort="50000" velocity="2.0"/>
+    <!-- [PHYSICS] 100000→70000 -->
+    <dynamics damping="4500.0" friction="100.0" spring_stiffness="70000.0" spring_reference="0"/>
+  </joint>
+  <link name="mr_hub">
+    <inertial><mass value="20.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+  <joint name="mr_hub_to_mr_wheel" type="continuous">
+    <parent link="mr_hub"/>
+    <child link="mr_wheel"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="mr_wheel">
+    <visual><geometry><cylinder radius="0.5" length="0.3"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.5" length="0.3"/></geometry></collision>
+    <inertial><mass value="80.0"/><inertia ixx="5.6" ixy="0" ixz="0" iyy="5.6" iyz="0" izz="10.0"/></inertial>
+  </link>
+
+  <!-- ── REAR LEFT (X=-1.5) ── -->
+  <joint name="left_rail_to_rl_spring" type="prismatic">
+    <parent link="left_rail"/>
+    <child link="rl_hub"/>
+    <origin xyz="-1.5 0.3 -0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.15" upper="0.15" effort="50000" velocity="2.0"/>
+    <!-- [PHYSICS] 100000→70000 -->
+    <dynamics damping="4500.0" friction="100.0" spring_stiffness="70000.0" spring_reference="0"/>
+  </joint>
+  <link name="rl_hub">
+    <inertial><mass value="20.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+  <joint name="rl_hub_to_rl_wheel" type="continuous">
+    <parent link="rl_hub"/>
+    <child link="rl_wheel"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="rl_wheel">
+    <visual><geometry><cylinder radius="0.5" length="0.3"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.5" length="0.3"/></geometry></collision>
+    <inertial><mass value="80.0"/><inertia ixx="5.6" ixy="0" ixz="0" iyy="5.6" iyz="0" izz="10.0"/></inertial>
+  </link>
+
+  <!-- ── REAR RIGHT (X=-1.5) ── -->
+  <joint name="right_rail_to_rr_spring" type="prismatic">
+    <parent link="right_rail"/>
+    <child link="rr_hub"/>
+    <origin xyz="-1.5 -0.3 -0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.15" upper="0.15" effort="50000" velocity="2.0"/>
+    <!-- [PHYSICS] 100000→70000 -->
+    <dynamics damping="4500.0" friction="100.0" spring_stiffness="70000.0" spring_reference="0"/>
+  </joint>
+  <link name="rr_hub">
+    <inertial><mass value="20.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+  <joint name="rr_hub_to_rr_wheel" type="continuous">
+    <parent link="rr_hub"/>
+    <child link="rr_wheel"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="rr_wheel">
+    <visual><geometry><cylinder radius="0.5" length="0.3"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.5" length="0.3"/></geometry></collision>
+    <inertial><mass value="80.0"/><inertia ixx="5.6" ixy="0" ixz="0" iyy="5.6" iyz="0" izz="10.0"/></inertial>
+  </link>
+
+  <!-- ============================================================== -->
+  <!-- 6.  TRAILER HITCH (revolute, Z axis = yaw)                      -->
+  <!--     Pre-rotated +45° via origin rpy so trailer spawns at MAX.   -->
+  <!--     Joint angle range: -pi/2 .. 0 (world yaw range: -45°..+45°) -->
+  <!--     To reset: rpy="0 0 0" and limit ±0.7854                     -->
+  <!-- ============================================================== -->
+  <joint name="trailer_hitch" type="revolute">
+    <parent link="chassis"/>
+    <child link="trailer_base"/>
+    <origin xyz="-2.0 0 0" rpy="0 0 0.7854"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.5708" upper="0" effort="20000" velocity="2.0"/>
+    <dynamics damping="200.0" friction="50.0"/>
+  </joint>
+  <link name="trailer_base">
+    <visual>
+      <geometry><cylinder radius="0.15" length="0.5"/></geometry>
+      <material name="hitch_yellow"><color rgba="0.95 0.75 0.1 1.0"/></material>
+    </visual>
+    <inertial>
+      <mass value="500.0"/>
+      <inertia ixx="83" ixy="0" ixz="0" iyy="208" iyz="0" izz="208"/>
+    </inertial>
+  </link>
+
+  <!-- ============================================================== -->
+  <!-- 7.  TRAILER H FRAME  (8 m rails span X=[-8, 0] in trailer_base) -->
+  <!-- ============================================================== -->
+
+  <!-- TRAILER LEFT RAIL (+Y) -->
+  <joint name="trailer_base_to_left_rail" type="fixed">
+    <parent link="trailer_base"/>
+    <child link="trailer_left_rail"/>
+    <origin xyz="-4.0 0.9 0" rpy="0 0 0"/>
+  </joint>
+  <link name="trailer_left_rail">
+    <visual>
+      <geometry><box size="8.0 0.2 0.3"/></geometry>
+      <material name="trailer_grey"><color rgba="0.25 0.25 0.25 1.0"/></material>
+    </visual>
+    <collision><geometry><box size="8.0 0.2 0.3"/></geometry></collision>
+    <inertial>
+      <mass value="1000.0"/>
+      <inertia ixx="10.83" ixy="0" ixz="0" iyy="5341" iyz="0" izz="5337"/>
+    </inertial>
+  </link>
+
+  <!-- TRAILER RIGHT RAIL (-Y) -->
+  <joint name="trailer_base_to_right_rail" type="fixed">
+    <parent link="trailer_base"/>
+    <child link="trailer_right_rail"/>
+    <origin xyz="-4.0 -0.9 0" rpy="0 0 0"/>
+  </joint>
+  <link name="trailer_right_rail">
+    <visual>
+      <geometry><box size="8.0 0.2 0.3"/></geometry>
+      <material name="trailer_grey"><color rgba="0.25 0.25 0.25 1.0"/></material>
+    </visual>
+    <collision><geometry><box size="8.0 0.2 0.3"/></geometry></collision>
+    <inertial>
+      <mass value="1000.0"/>
+      <inertia ixx="10.83" ixy="0" ixz="0" iyy="5341" iyz="0" izz="5337"/>
+    </inertial>
+  </link>
+
+  <!-- TRAILER MID CROSS BEAM (X=-4) -->
+  <joint name="trailer_base_to_mid_beam" type="fixed">
+    <parent link="trailer_base"/>
+    <child link="trailer_mid_beam"/>
+    <origin xyz="-4.0 0 -0.15" rpy="1.5708 0 0"/>
+  </joint>
+  <link name="trailer_mid_beam">
+    <visual><geometry><cylinder radius="0.08" length="1.8"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.08" length="1.8"/></geometry></collision>
+    <inertial>
+      <mass value="120.0"/>
+      <inertia ixx="32.59" ixy="0" ixz="0" iyy="32.59" iyz="0" izz="0.384"/>
+    </inertial>
+  </link>
+
+  <!-- TRAILER FRONT TANDEM AXLE BEAM (X=-6.5) -->
+  <joint name="trailer_base_to_front_tandem_beam" type="fixed">
+    <parent link="trailer_base"/>
+    <child link="trailer_front_tandem_beam"/>
+    <origin xyz="-6.5 0 -0.15" rpy="1.5708 0 0"/>
+  </joint>
+  <link name="trailer_front_tandem_beam">
+    <visual><geometry><cylinder radius="0.08" length="1.8"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.08" length="1.8"/></geometry></collision>
+    <inertial>
+      <mass value="120.0"/>
+      <inertia ixx="32.59" ixy="0" ixz="0" iyy="32.59" iyz="0" izz="0.384"/>
+    </inertial>
+  </link>
+
+  <!-- TRAILER REAR TANDEM AXLE BEAM (X=-7.5) -->
+  <joint name="trailer_base_to_rear_tandem_beam" type="fixed">
+    <parent link="trailer_base"/>
+    <child link="trailer_rear_tandem_beam"/>
+    <origin xyz="-7.5 0 -0.15" rpy="1.5708 0 0"/>
+  </joint>
+  <link name="trailer_rear_tandem_beam">
+    <visual><geometry><cylinder radius="0.08" length="1.8"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.08" length="1.8"/></geometry></collision>
+    <inertial>
+      <mass value="120.0"/>
+      <inertia ixx="32.59" ixy="0" ixz="0" iyy="32.59" iyz="0" izz="0.384"/>
+    </inertial>
+  </link>
+
+  <!-- ── TRAILER SUSPENSION BARS (visual, mirrors tractor copy_truck) ─────
+       Each bar hangs from its rail at the wheel-X position, shifted
+       0.185 m inboard (= wheel_width/2 + bar_width/2 = 0.15 + 0.035) so
+       it sits flush against the inner face of the wheel disc.
+       Bar centre at Z=-0.25 → spans rail Z=0 down to hub Z=-0.5.
+  ─────────────────────────────────────────────────────────────────────── -->
+
+  <!-- Trailer FRONT-TANDEM LEFT bar (rail-frame X=-2.5, Y=+0.115) -->
+  <joint name="trailer_left_rail_to_tfl_suspension_bar" type="fixed">
+    <parent link="trailer_left_rail"/>
+    <child link="tfl_suspension_bar"/>
+    <origin xyz="-2.5 0.115 -0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="tfl_suspension_bar">
+    <visual>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+      <material name="suspension_orange"><color rgba="1.0 0.55 0.0 1.0"/></material>
+    </visual>
+    <collision><geometry><box size="0.07 0.07 0.5"/></geometry></collision>
+    <inertial><mass value="10.0"/>
+      <inertia ixx="0.212" ixy="0" ixz="0" iyy="0.212" iyz="0" izz="0.008"/>
+    </inertial>
+  </link>
+
+  <!-- Trailer FRONT-TANDEM RIGHT bar (rail-frame X=-2.5, Y=-0.115) -->
+  <joint name="trailer_right_rail_to_tfr_suspension_bar" type="fixed">
+    <parent link="trailer_right_rail"/>
+    <child link="tfr_suspension_bar"/>
+    <origin xyz="-2.5 -0.115 -0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="tfr_suspension_bar">
+    <visual>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+      <material name="suspension_orange"><color rgba="1.0 0.55 0.0 1.0"/></material>
+    </visual>
+    <collision><geometry><box size="0.07 0.07 0.5"/></geometry></collision>
+    <inertial><mass value="10.0"/>
+      <inertia ixx="0.212" ixy="0" ixz="0" iyy="0.212" iyz="0" izz="0.008"/>
+    </inertial>
+  </link>
+
+  <!-- Trailer REAR-TANDEM LEFT bar (rail-frame X=-3.5, Y=+0.115) -->
+  <joint name="trailer_left_rail_to_trl_suspension_bar" type="fixed">
+    <parent link="trailer_left_rail"/>
+    <child link="trl_suspension_bar"/>
+    <origin xyz="-3.5 0.115 -0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="trl_suspension_bar">
+    <visual>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+      <material name="suspension_orange"><color rgba="1.0 0.55 0.0 1.0"/></material>
+    </visual>
+    <collision><geometry><box size="0.07 0.07 0.5"/></geometry></collision>
+    <inertial><mass value="10.0"/>
+      <inertia ixx="0.212" ixy="0" ixz="0" iyy="0.212" iyz="0" izz="0.008"/>
+    </inertial>
+  </link>
+
+  <!-- Trailer REAR-TANDEM RIGHT bar (rail-frame X=-3.5, Y=-0.115) -->
+  <joint name="trailer_right_rail_to_trr_suspension_bar" type="fixed">
+    <parent link="trailer_right_rail"/>
+    <child link="trr_suspension_bar"/>
+    <origin xyz="-3.5 -0.115 -0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="trr_suspension_bar">
+    <visual>
+      <geometry><box size="0.07 0.07 0.5"/></geometry>
+      <material name="suspension_orange"><color rgba="1.0 0.55 0.0 1.0"/></material>
+    </visual>
+    <collision><geometry><box size="0.07 0.07 0.5"/></geometry></collision>
+    <inertial><mass value="10.0"/>
+      <inertia ixx="0.212" ixy="0" ixz="0" iyy="0.212" iyz="0" izz="0.008"/>
+    </inertial>
+  </link>
+
+  <!-- ============================================================== -->
+  <!-- 8.  TRAILER SUSPENSION + 4 WHEELS                                -->
+  <!--     [PHYSICS] spring_stiffness 100000 → 70000 N/m (all 4)       -->
+  <!-- ============================================================== -->
+
+  <!-- ── TRAILER FRONT-TANDEM LEFT ── -->
+  <joint name="trailer_left_rail_to_tfl_spring" type="prismatic">
+    <parent link="trailer_left_rail"/>
+    <child link="tfl_hub"/>
+    <origin xyz="-2.5 0.3 -0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.15" upper="0.15" effort="50000" velocity="2.0"/>
+    <!-- [PHYSICS] 100000→70000 -->
+    <dynamics damping="4500.0" friction="100.0" spring_stiffness="70000.0" spring_reference="0"/>
+  </joint>
+  <link name="tfl_hub">
+    <inertial><mass value="20.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+  <joint name="tfl_hub_to_tfl_wheel" type="continuous">
+    <parent link="tfl_hub"/>
+    <child link="tfl_wheel"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="tfl_wheel">
+    <visual><geometry><cylinder radius="0.5" length="0.3"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.5" length="0.3"/></geometry></collision>
+    <inertial><mass value="80.0"/><inertia ixx="5.6" ixy="0" ixz="0" iyy="5.6" iyz="0" izz="10.0"/></inertial>
+  </link>
+
+  <!-- ── TRAILER FRONT-TANDEM RIGHT ── -->
+  <joint name="trailer_right_rail_to_tfr_spring" type="prismatic">
+    <parent link="trailer_right_rail"/>
+    <child link="tfr_hub"/>
+    <origin xyz="-2.5 -0.3 -0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.15" upper="0.15" effort="50000" velocity="2.0"/>
+    <!-- [PHYSICS] 100000→70000 -->
+    <dynamics damping="4500.0" friction="100.0" spring_stiffness="70000.0" spring_reference="0"/>
+  </joint>
+  <link name="tfr_hub">
+    <inertial><mass value="20.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+  <joint name="tfr_hub_to_tfr_wheel" type="continuous">
+    <parent link="tfr_hub"/>
+    <child link="tfr_wheel"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="tfr_wheel">
+    <visual><geometry><cylinder radius="0.5" length="0.3"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.5" length="0.3"/></geometry></collision>
+    <inertial><mass value="80.0"/><inertia ixx="5.6" ixy="0" ixz="0" iyy="5.6" iyz="0" izz="10.0"/></inertial>
+  </link>
+
+  <!-- ── TRAILER REAR-TANDEM LEFT ── -->
+  <joint name="trailer_left_rail_to_trl_spring" type="prismatic">
+    <parent link="trailer_left_rail"/>
+    <child link="trl_hub"/>
+    <origin xyz="-3.5 0.3 -0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.15" upper="0.15" effort="50000" velocity="2.0"/>
+    <!-- [PHYSICS] 100000→70000 -->
+    <dynamics damping="4500.0" friction="100.0" spring_stiffness="70000.0" spring_reference="0"/>
+  </joint>
+  <link name="trl_hub">
+    <inertial><mass value="20.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+  <joint name="trl_hub_to_trl_wheel" type="continuous">
+    <parent link="trl_hub"/>
+    <child link="trl_wheel"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="trl_wheel">
+    <visual><geometry><cylinder radius="0.5" length="0.3"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.5" length="0.3"/></geometry></collision>
+    <inertial><mass value="80.0"/><inertia ixx="5.6" ixy="0" ixz="0" iyy="5.6" iyz="0" izz="10.0"/></inertial>
+  </link>
+
+  <!-- ── TRAILER REAR-TANDEM RIGHT ── -->
+  <joint name="trailer_right_rail_to_trr_spring" type="prismatic">
+    <parent link="trailer_right_rail"/>
+    <child link="trr_hub"/>
+    <origin xyz="-3.5 -0.3 -0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.15" upper="0.15" effort="50000" velocity="2.0"/>
+    <!-- [PHYSICS] 100000→70000 -->
+    <dynamics damping="4500.0" friction="100.0" spring_stiffness="70000.0" spring_reference="0"/>
+  </joint>
+  <link name="trr_hub">
+    <inertial><mass value="20.0"/><inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/></inertial>
+  </link>
+  <joint name="trr_hub_to_trr_wheel" type="continuous">
+    <parent link="trr_hub"/>
+    <child link="trr_wheel"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="trr_wheel">
+    <visual><geometry><cylinder radius="0.5" length="0.3"/></geometry></visual>
+    <collision><geometry><cylinder radius="0.5" length="0.3"/></geometry></collision>
+    <inertial><mass value="80.0"/><inertia ixx="5.6" ixy="0" ixz="0" iyy="5.6" iyz="0" izz="10.0"/></inertial>
+  </link>
+
+  <!-- ============================================================== -->
+  <!-- 9.  SENSORS (IMU & GPS — unchanged)                             -->
+  <!-- ============================================================== -->
+  <joint name="imu_joint" type="fixed">
+    <parent link="chassis"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="imu_link"/>
+
+  <joint name="gps_joint" type="fixed">
+    <parent link="driver_deck"/>
+    <child link="gps_link"/>
+    <origin xyz="0 0 0.75" rpy="0 0 0"/>
+  </joint>
+  <link name="gps_link"/>
+
+  <!-- ============================================================== -->
+  <!-- 7.  PER-WHEEL CONTACT SURFACE  [PHYSICS]                        -->
+  <!--                                                                  -->
+  <!--  Rubber tyre on dry concrete:                                    -->
+  <!--    mu1  = 0.85  (longitudinal – rolling/braking direction)       -->
+  <!--    mu2  = 0.75  (lateral – cornering)                            -->
+  <!--    kp   = 1e6 N/m (tyre contact stiffness; ground uses 1e7)      -->
+  <!--    kd   = 50 N·s/m                                               -->
+  <!--    slip1 = 0.002 (1% longitudinal compliance)                    -->
+  <!--    slip2 = 0.005 (0.5% lateral compliance)                       -->
+  <!--    minDepth = 0.002 m (2 mm tyre deformation before contact)     -->
+  <!--    maxContacts = 3  (performance: limit contact points per wheel) -->
+  <!-- ============================================================== -->
+
+  <!-- front-left wheel -->
+  <gazebo reference="fl_wheel">
+    <mu1>0.85</mu1>
+    <mu2>0.75</mu2>
+    <kp>1000000</kp>
+    <kd>50</kd>
+    <slip1>0.002</slip1>
+    <slip2>0.005</slip2>
+    <minDepth>0.002</minDepth>
+    <maxVel>0.2</maxVel>
+    <maxContacts>3</maxContacts>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- front-right wheel -->
+  <gazebo reference="fr_wheel">
+    <mu1>0.85</mu1>
+    <mu2>0.75</mu2>
+    <kp>1000000</kp>
+    <kd>50</kd>
+    <slip1>0.002</slip1>
+    <slip2>0.005</slip2>
+    <minDepth>0.002</minDepth>
+    <maxVel>0.2</maxVel>
+    <maxContacts>3</maxContacts>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- mid-left drive wheel -->
+  <gazebo reference="ml_wheel">
+    <mu1>0.85</mu1>
+    <mu2>0.75</mu2>
+    <kp>1000000</kp>
+    <kd>50</kd>
+    <slip1>0.002</slip1>
+    <slip2>0.005</slip2>
+    <minDepth>0.002</minDepth>
+    <maxVel>0.2</maxVel>
+    <maxContacts>3</maxContacts>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- mid-right drive wheel -->
+  <gazebo reference="mr_wheel">
+    <mu1>0.85</mu1>
+    <mu2>0.75</mu2>
+    <kp>1000000</kp>
+    <kd>50</kd>
+    <slip1>0.002</slip1>
+    <slip2>0.005</slip2>
+    <minDepth>0.002</minDepth>
+    <maxVel>0.2</maxVel>
+    <maxContacts>3</maxContacts>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- rear-left drive wheel -->
+  <gazebo reference="rl_wheel">
+    <mu1>0.85</mu1>
+    <mu2>0.75</mu2>
+    <kp>1000000</kp>
+    <kd>50</kd>
+    <slip1>0.002</slip1>
+    <slip2>0.005</slip2>
+    <minDepth>0.002</minDepth>
+    <maxVel>0.2</maxVel>
+    <maxContacts>3</maxContacts>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- rear-right drive wheel -->
+  <gazebo reference="rr_wheel">
+    <mu1>0.85</mu1>
+    <mu2>0.75</mu2>
+    <kp>1000000</kp>
+    <kd>50</kd>
+    <slip1>0.002</slip1>
+    <slip2>0.005</slip2>
+    <minDepth>0.002</minDepth>
+    <maxVel>0.2</maxVel>
+    <maxContacts>3</maxContacts>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- trailer front-tandem LEFT wheel -->
+  <gazebo reference="tfl_wheel">
+    <mu1>0.85</mu1>
+    <mu2>0.75</mu2>
+    <kp>1000000</kp>
+    <kd>50</kd>
+    <slip1>0.002</slip1>
+    <slip2>0.005</slip2>
+    <minDepth>0.002</minDepth>
+    <maxVel>0.2</maxVel>
+    <maxContacts>3</maxContacts>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- trailer front-tandem RIGHT wheel -->
+  <gazebo reference="tfr_wheel">
+    <mu1>0.85</mu1>
+    <mu2>0.75</mu2>
+    <kp>1000000</kp>
+    <kd>50</kd>
+    <slip1>0.002</slip1>
+    <slip2>0.005</slip2>
+    <minDepth>0.002</minDepth>
+    <maxVel>0.2</maxVel>
+    <maxContacts>3</maxContacts>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- trailer rear-tandem LEFT wheel -->
+  <gazebo reference="trl_wheel">
+    <mu1>0.85</mu1>
+    <mu2>0.75</mu2>
+    <kp>1000000</kp>
+    <kd>50</kd>
+    <slip1>0.002</slip1>
+    <slip2>0.005</slip2>
+    <minDepth>0.002</minDepth>
+    <maxVel>0.2</maxVel>
+    <maxContacts>3</maxContacts>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- trailer rear-tandem RIGHT wheel -->
+  <gazebo reference="trr_wheel">
+    <mu1>0.85</mu1>
+    <mu2>0.75</mu2>
+    <kp>1000000</kp>
+    <kd>50</kd>
+    <slip1>0.002</slip1>
+    <slip2>0.005</slip2>
+    <minDepth>0.002</minDepth>
+    <maxVel>0.2</maxVel>
+    <maxContacts>3</maxContacts>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+
+  <!-- ============================================================== -->
+  <!-- 8.  ODOMETRY PUBLISHER                                          -->
+  <!-- ============================================================== -->
+  <gazebo>
+    <plugin filename="gz-sim-odometry-publisher-system"
+            name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <dimensions>3</dimensions>
+      <odom_publish_frequency>100</odom_publish_frequency>
+    </plugin>
+  </gazebo>
+
+  <!-- ============================================================== -->
+  <!-- 9.  STEERING POSITION CONTROLLERS  [PHYSICS]                    -->
+  <!--     p_gain 500→1500, i_gain 1→2, d_gain 50→100                 -->
+  <!--     Reason: faster servo bandwidth without overshoot.           -->
+  <!--     Higher P tracks the Ackermann setpoint more tightly at 1kHz -->
+  <!-- ============================================================== -->
+  <gazebo>
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>fl_steering_joint</joint_name>
+      <topic>/truck/fl_steer/cmd_pos</topic>
+      <p_gain>1500</p_gain>
+      <i_gain>2.0</i_gain>
+      <d_gain>100</d_gain>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>fr_steering_joint</joint_name>
+      <topic>/truck/fr_steer/cmd_pos</topic>
+      <p_gain>1500</p_gain>
+      <i_gain>2.0</i_gain>
+      <d_gain>100</d_gain>
+    </plugin>
+
+    <!-- ── SUSPENSION SPRING-DAMPERS ─────────────────────────────────────
+         URDF <dynamics spring_stiffness=…> is dropped by the URDF→SDF
+         converter in Gz Harmonic, so the prismatic spring joints get
+         NO restoring force from the dynamics tag.
+         We restore spring behaviour actively via JointPositionController
+         in PD mode: target = 0, P = stiffness, D = damping.
+         Force applied to joint: F = −P·x − D·ẋ  (exact spring-damper).
+           k = 70 000 N/m   →  fn ≈ 1.5 Hz at 692 kg/wheel sprung mass
+           c = 4 500 N·s/m  →  ζ ≈ 0.32 (under-damped, 2-3 visible bounces)
+    ─────────────────────────────────────────────────────────────────── -->
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>fl_spring</joint_name>
+      <p_gain>70000</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>4500</d_gain>
+      <initial_position>0.0</initial_position>
+      <cmd_max>100000</cmd_max>
+      <cmd_min>-100000</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>fr_spring</joint_name>
+      <p_gain>70000</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>4500</d_gain>
+      <initial_position>0.0</initial_position>
+      <cmd_max>100000</cmd_max>
+      <cmd_min>-100000</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>left_rail_to_ml_spring</joint_name>
+      <p_gain>70000</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>4500</d_gain>
+      <initial_position>0.0</initial_position>
+      <cmd_max>100000</cmd_max>
+      <cmd_min>-100000</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>right_rail_to_mr_spring</joint_name>
+      <p_gain>70000</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>4500</d_gain>
+      <initial_position>0.0</initial_position>
+      <cmd_max>100000</cmd_max>
+      <cmd_min>-100000</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>left_rail_to_rl_spring</joint_name>
+      <p_gain>70000</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>4500</d_gain>
+      <initial_position>0.0</initial_position>
+      <cmd_max>100000</cmd_max>
+      <cmd_min>-100000</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>right_rail_to_rr_spring</joint_name>
+      <p_gain>70000</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>4500</d_gain>
+      <initial_position>0.0</initial_position>
+      <cmd_max>100000</cmd_max>
+      <cmd_min>-100000</cmd_min>
+    </plugin>
+
+    <!-- ── TRAILER SPRING PD CONTROLLERS  (same k=70 000, c=4 500) ─── -->
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>trailer_left_rail_to_tfl_spring</joint_name>
+      <p_gain>70000</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>4500</d_gain>
+      <initial_position>0.0</initial_position>
+      <cmd_max>100000</cmd_max>
+      <cmd_min>-100000</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>trailer_right_rail_to_tfr_spring</joint_name>
+      <p_gain>70000</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>4500</d_gain>
+      <initial_position>0.0</initial_position>
+      <cmd_max>100000</cmd_max>
+      <cmd_min>-100000</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>trailer_left_rail_to_trl_spring</joint_name>
+      <p_gain>70000</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>4500</d_gain>
+      <initial_position>0.0</initial_position>
+      <cmd_max>100000</cmd_max>
+      <cmd_min>-100000</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>trailer_right_rail_to_trr_spring</joint_name>
+      <p_gain>70000</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>4500</d_gain>
+      <initial_position>0.0</initial_position>
+      <cmd_max>100000</cmd_max>
+      <cmd_min>-100000</cmd_min>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-state-publisher-system"
+            name="gz::sim::systems::JointStatePublisher"/>
+
+    <!-- ── REAR-WHEEL DRIVE (same 4 joints, same topic /truck/drive) ── -->
+    <plugin filename="gz-sim-joint-controller-system"
+            name="gz::sim::systems::JointController">
+      <joint_name>ml_hub_to_ml_wheel</joint_name>
+      <topic>/truck/drive</topic>
+    </plugin>
+    <plugin filename="gz-sim-joint-controller-system"
+            name="gz::sim::systems::JointController">
+      <joint_name>mr_hub_to_mr_wheel</joint_name>
+      <topic>/truck/drive</topic>
+    </plugin>
+    <plugin filename="gz-sim-joint-controller-system"
+            name="gz::sim::systems::JointController">
+      <joint_name>rl_hub_to_rl_wheel</joint_name>
+      <topic>/truck/drive</topic>
+    </plugin>
+    <plugin filename="gz-sim-joint-controller-system"
+            name="gz::sim::systems::JointController">
+      <joint_name>rr_hub_to_rr_wheel</joint_name>
+      <topic>/truck/drive</topic>
+    </plugin>
+  </gazebo>
+
+  <!-- ============================================================== -->
+  <!-- 10.  SENSORS                                                    -->
+  <!-- ============================================================== -->
+  <gazebo reference="imu_link">
+    <sensor name="truck_imu" type="imu">
+      <always_on>1</always_on>
+      <update_rate>100</update_rate>
+      <visualize>false</visualize>
+      <topic>imu</topic>
+      <imu>
+        <angular_velocity>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>2e-4</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>2e-4</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>2e-4</stddev></noise></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>1.7e-2</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>1.7e-2</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>1.7e-2</stddev></noise></z>
+        </linear_acceleration>
+      </imu>
+    </sensor>
+  </gazebo>
+
+  <link name="lidar_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.05" length="0.1"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="driver_deck"/>
+    <child link="lidar_link"/>
+    <!-- Place it 0.85m above the driver_deck origin (just above the roof), angled slightly downwards (pitch = 0.1 rad) -->
+    <origin xyz="0.0 0.0 0.85" rpy="0 0.1 0"/>
+  </joint>
+
+  <gazebo reference="lidar_link">
+    <sensor name="truck_lidar" type="gpu_lidar">
+      <pose>0 0 0 0 0 0</pose>
+      <always_on>true</always_on>
+      <topic>/lidar</topic>
+      <gz_frame_id>lidar_link</gz_frame_id>
+      <update_rate>10</update_rate>
+      <visualize>false</visualize>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>256</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>8</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.26</min_angle>
+            <max_angle>0.0</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.5</min>
+          <max>100.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="gps_link">
+    <sensor name="truck_gps" type="navsat">
+      <always_on>1</always_on>
+      <update_rate>10</update_rate>
+      <topic>gps/fix</topic>
+      <navsat>
+        <position_sensing>
+          <horizontal>
+            <noise type="gaussian"><mean>0.0</mean><stddev>0.1</stddev></noise>
+          </horizontal>
+          <vertical>
+            <noise type="gaussian"><mean>0.0</mean><stddev>0.1</stddev></noise>
+          </vertical>
+        </position_sensing>
+      </navsat>
+    </sensor>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="pacejka_plugin" filename="libpacejka_plugin.so">
+      <vehicle_mass>4750.0</vehicle_mass>
+      <unsprung_mass>85.0</unsprung_mass>
+      <wheel_radius>0.5</wheel_radius>
+      <wheel_width>0.3</wheel_width>
+      <wheelbase>2.5</wheelbase>
+      <track_width>2.4</track_width>
+      <cg_height>0.98</cg_height>
+      <max_steer_rad>0.5236</max_steer_rad>
+      
+      <wheel name="fl_wheel">
+        <joint_name>fl_steering_joint</joint_name>
+        <is_steerable>true</is_steerable>
+        <ks>75000.0</ks>
+        <cs>5200.0</cs>
+        <mu>0.85</mu>
+        <pacejka_B>10.0</pacejka_B>
+        <pacejka_C>1.65</pacejka_C>
+      </wheel>
+
+      <wheel name="fr_wheel">
+        <joint_name>fr_steering_joint</joint_name>
+        <is_steerable>true</is_steerable>
+        <ks>75000.0</ks>
+        <cs>5200.0</cs>
+        <mu>0.85</mu>
+        <pacejka_B>10.0</pacejka_B>
+        <pacejka_C>1.65</pacejka_C>
+      </wheel>
+
+      <wheel name="ml_wheel">
+        <joint_name>ml_hub_to_ml_wheel</joint_name>
+        <is_steerable>false</is_steerable>
+        <ks>80000.0</ks>
+        <cs>5500.0</cs>
+        <mu>0.85</mu>
+        <pacejka_B>12.0</pacejka_B>
+        <pacejka_C>1.65</pacejka_C>
+      </wheel>
+
+      <wheel name="mr_wheel">
+        <joint_name>mr_hub_to_mr_wheel</joint_name>
+        <is_steerable>false</is_steerable>
+        <ks>80000.0</ks>
+        <cs>5500.0</cs>
+        <mu>0.85</mu>
+        <pacejka_B>12.0</pacejka_B>
+        <pacejka_C>1.65</pacejka_C>
+      </wheel>
+
+      <wheel name="rl_wheel">
+        <joint_name>rl_hub_to_rl_wheel</joint_name>
+        <is_steerable>false</is_steerable>
+        <ks>80000.0</ks>
+        <cs>5500.0</cs>
+        <mu>0.85</mu>
+        <pacejka_B>12.0</pacejka_B>
+        <pacejka_C>1.65</pacejka_C>
+      </wheel>
+
+      <wheel name="rr_wheel">
+        <joint_name>rr_hub_to_rr_wheel</joint_name>
+        <is_steerable>false</is_steerable>
+        <ks>80000.0</ks>
+        <cs>5500.0</cs>
+        <mu>0.85</mu>
+        <pacejka_B>12.0</pacejka_B>
+        <pacejka_C>1.65</pacejka_C>
+      </wheel>
+
+      <wheel name="tfl_wheel">
+        <joint_name>tfl_hub_to_tfl_wheel</joint_name>
+        <is_steerable>false</is_steerable>
+        <ks>80000.0</ks>
+        <cs>5500.0</cs>
+        <mu>0.85</mu>
+        <pacejka_B>12.0</pacejka_B>
+        <pacejka_C>1.65</pacejka_C>
+      </wheel>
+
+      <wheel name="tfr_wheel">
+        <joint_name>tfr_hub_to_tfr_wheel</joint_name>
+        <is_steerable>false</is_steerable>
+        <ks>80000.0</ks>
+        <cs>5500.0</cs>
+        <mu>0.85</mu>
+        <pacejka_B>12.0</pacejka_B>
+        <pacejka_C>1.65</pacejka_C>
+      </wheel>
+
+      <wheel name="trl_wheel">
+        <joint_name>trl_hub_to_trl_wheel</joint_name>
+        <is_steerable>false</is_steerable>
+        <ks>80000.0</ks>
+        <cs>5500.0</cs>
+        <mu>0.85</mu>
+        <pacejka_B>12.0</pacejka_B>
+        <pacejka_C>1.65</pacejka_C>
+      </wheel>
+
+      <wheel name="trr_wheel">
+        <joint_name>trr_hub_to_trr_wheel</joint_name>
+        <is_steerable>false</is_steerable>
+        <ks>80000.0</ks>
+        <cs>5500.0</cs>
+        <mu>0.85</mu>
+        <pacejka_B>12.0</pacejka_B>
+        <pacejka_C>1.65</pacejka_C>
+      </wheel>
+
+    </plugin>
+  </gazebo>
+
+</robot>
